@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>낯선 방에서 나 자신을 찾아라! | 미스터리 MBTI</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <!-- Font Awesome (아이콘용) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Noto+Sans+JP:wght@400;700&display=swap');
+        body {
+            font-family: 'Gowun Batang', 'Noto Sans JP', serif;
+        }
+        /* 해리포터풍 엔틱하고 미스터리한 방 배경 이미지 */
+        .bg-mystery-room {
+            background-image: linear-gradient(to bottom, rgba(13, 17, 23, 0.88), rgba(8, 10, 15, 0.96)), 
+                              url('https://images.unsplash.com/photo-1507842217343-583bb7270b66?auto=format&fit=crop&q=80&w=1200');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+        }
+    </style>
+</head>
+<body class="bg-mystery-room text-gray-200 min-h-screen flex flex-col justify-between selection:bg-amber-950 selection:text-amber-100">
+
+    <!-- 상단 헤더 -->
+    <header class="p-4 flex justify-between items-center border-b border-emerald-950/40 bg-gray-950/70 backdrop-blur-md sticky top-0 z-50">
+        <div class="flex items-center space-x-2">
+            <i class="fa-solid fa-key text-amber-500 animate-pulse"></i>
+            <span class="text-amber-500 font-bold tracking-wider text-sm md:text-base font-serif">PROJECT: E.X.I.T</span>
+        </div>
+        <button id="lang-toggle" onclick="toggleLanguage()" class="px-3 py-1.5 rounded-full border border-emerald-900/40 bg-gray-900/80 hover:bg-emerald-950 text-xs md:text-sm font-sans transition-all flex items-center space-x-1 cursor-pointer text-amber-400">
+            <i class="fa-solid fa-globe text-amber-500/70"></i>
+            <span id="lang-text">JA / 日本語</span>
+        </button>
+    </header>
+
+    <!-- 메인 컨텐츠 영역 -->
+    <main class="flex-grow flex items-center justify-center p-4 max-w-xl mx-auto w-full">
+        
+        <!-- 1. 시작 화면 -->
+        <div id="start-page" class="w-full text-center space-y-8 py-8">
+            <div class="space-y-3">
+                <p id="start-sub" class="text-amber-500/70 tracking-widest text-xs md:text-sm uppercase font-serif">🔮 Mystery Storytelling MBTI</p>
+                <h1 id="start-title" class="text-3xl md:text-4xl font-bold text-gray-100 leading-snug font-serif break-keep">
+                    낯선 방에서<br><span class="text-amber-400 drop-shadow-[0_2px_8px_rgba(245,158,11,0.4)]">나 자신</span>을 찾아라!
+                </h1>
+            </div>
+            
+            <!-- 메인 이미지 대용 프레임 (엔틱 골드 링 효과) -->
+            <div class="relative w-full aspect-video bg-gray-950/60 border border-emerald-900/30 rounded-2xl overflow-hidden flex items-center justify-center shadow-2xl group ring-1 ring-amber-500/20">
+                <div class="absolute inset-0 bg-radial from-transparent to-gray-950/90 z-10"></div>
+                <i class="fa-solid fa-door-closed text-6xl text-emerald-900/50 group-hover:text-amber-500/30 transition-colors duration-700"></i>
+                <div class="absolute bottom-4 left-4 right-4 z-20 text-left bg-gray-950/80 p-3 rounded-xl border border-emerald-900/20">
+                    <p id="start-desc" class="text-xs md:text-sm text-gray-300 leading-relaxed font-sans break-keep">
+                        눈을 떠보니 기억이 없다. 사방은 서늘한 기운이 감도는 차가운 벽뿐. 이 기괴한 방들을 탈출하는 과정에서 당신의 진짜 모습을 마주하게 될 것이다.
+                    </p>
+                </div>
+            </div>
+
+            <button onclick="startTest()" class="w-full py-4 bg-emerald-950 hover:bg-emerald-900 border border-amber-600/40 text-amber-200 font-bold rounded-xl tracking-widest transition-all duration-300 shadow-lg shadow-emerald-950/80 transform hover:-translate-y-0.5 cursor-pointer font-serif">
+                <span id="start-btn-text">기억의 방으로 들어가기</span> <i class="fa-solid fa-chevron-right ml-1 text-xs text-amber-400"></i>
+            </button>
+        </div>
+
+        <!-- 2. 검사 진행 화면 -->
+        <div id="test-page" class="w-full space-y-6 hidden">
+            <!-- 상단 바 -->
+            <div class="flex items-center space-x-4">
+                <button onclick="prevQuestion()" class="p-2 text-gray-500 hover:text-amber-400 transition-colors cursor-pointer" id="back-btn">
+                    <i class="fa-solid fa-arrow-left text-lg"></i>
+                </button>
+                <div class="flex-grow bg-gray-950/80 h-2 rounded-full overflow-hidden border border-emerald-950">
+                    <div id="progress-bar" class="bg-gradient-to-r from-emerald-800 to-amber-500 h-full w-0 transition-all duration-300"></div>
+                </div>
+                <span id="progress-text" class="text-xs font-serif text-amber-500/70 min-w-[35px] text-right">1 / 8</span>
+            </div>
+
+            <!-- 상황 카드 -->
+            <div class="bg-gray-950/85 border border-emerald-900/30 rounded-2xl p-5 md:p-6 space-y-5 shadow-2xl backdrop-blur-sm ring-1 ring-amber-500/10">
+                <p id="question-text" class="text-base md:text-lg leading-relaxed text-gray-200 font-medium break-keep">
+                    질문 로딩 중...
+                </p>
+            </div>
+
+            <!-- 이지선다 선택지 버튼 -->
+            <div class="space-y-3">
+                <button onclick="selectOption('A')" id="option-a" class="w-full text-left p-4 bg-gray-900/90 hover:bg-emerald-950/60 border border-emerald-900/20 hover:border-amber-500/50 rounded-xl text-sm md:text-base leading-relaxed transition-all duration-200 transform hover:-translate-y-0.5 shadow-md text-gray-300 hover:text-amber-100 cursor-pointer break-keep ring-1 ring-transparent hover:ring-amber-500/20">
+                    선택지 A
+                </button>
+                <button onclick="selectOption('B')" id="option-b" class="w-full text-left p-4 bg-gray-900/90 hover:bg-emerald-950/60 border border-emerald-900/20 hover:border-amber-500/50 rounded-xl text-sm md:text-base leading-relaxed transition-all duration-200 transform hover:-translate-y-0.5 shadow-md text-gray-300 hover:text-amber-100 cursor-pointer break-keep ring-1 ring-transparent hover:ring-amber-500/20">
+                    선택지 B
+                </button>
+            </div>
+        </div>
+
+        <!-- 3. 로딩 화면 -->
+        <div id="loading-page" class="w-full text-center space-y-4 hidden">
+            <div class="relative inline-block">
+                <div class="animate-spin rounded-full h-14 w-14 border-4 border-emerald-900 border-t-amber-500"></div>
+                <i class="fa-solid fa-hourglass-half text-amber-500 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-sm animate-pulse"></i>
+            </div>
+            <p id="loading-text" class="text-sm tracking-widest text-amber-400 font-serif">기억 조각을 조립하는 중...</p>
+        </div>
+
+        <!-- 4. 결과 출력 화면 -->
+        <div id="result-page" class="w-full space-y-6 hidden py-4">
+            <div class="bg-gray-950/90 border-2 border-amber-600/30 rounded-2xl p-6 space-y-6 shadow-2xl text-center relative overflow-hidden backdrop-blur-md">
+                <div class="absolute -top-10 -right-10 w-32 h-32 bg-amber-500/10 rounded-full blur-2xl"></div>
+                
+                <div class="space-y-1">
+                    <span id="result-tag" class="text-xs font-serif tracking-widest text-amber-500 uppercase font-bold">Analysis Result</span>
+                    <h2 id="result-mbti" class="text-4xl md:text-5xl font-black tracking-wider text-amber-400 font-serif drop-shadow-md">ISTJ</h2>
+                    <p id="result-title" class="text-base md:text-lg text-gray-300 font-serif font-bold tracking-tight mt-1" style="color: #fde047;">신중하고 논리적인 생존자</p>
+                </div>
+
+                <hr class="border-emerald-950">
+
+                <p id="result-desc" class="text-sm md:text-base leading-relaxed text-gray-300 text-left font-sans break-keep">
+                    결과 로딩 중...
+                </p>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-left pt-2">
+                    <div class="bg-emerald-950/30 p-3.5 rounded-lg border border-emerald-900/40">
+                        <h4 class="text-xs font-bold text-amber-400 mb-1.5 flex items-center"><i class="fa-solid fa-circle-check text-amber-500 mr-1.5"></i> <span class="lbl-pros">성향별 장점</span></h4>
+                        <p id="result-pros" class="text-xs md:text-sm text-gray-300 font-sans">로딩 중</p>
+                    </div>
+                    <div class="bg-emerald-950/30 p-3.5 rounded-lg border border-emerald-900/40">
+                        <h4 class="text-xs font-bold text-amber-400 mb-1.5 flex items-center"><i class="fa-solid fa-lightbulb text-amber-500 mr-1.5"></i> <span class="lbl-advice">일상 극복 조언</span></h4>
+                        <p id="result-advice" class="text-xs md:text-sm text-gray-300 font-sans">로딩 중</p>
+                    </div>
+                </div>
+
+                <div class="bg-gray-900/80 p-4 rounded-xl border border-emerald-900/40 space-y-3">
+                    <h4 class="text-xs font-bold tracking-wider text-amber-500/80 text-center uppercase flex items-center justify-center font-serif"><i class="fa-solid fa-circle-nodes text-amber-500 mr-1.5"></i><span class="lbl-partner">방 탈출 파트너 (궁합)</span></h4>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="bg-gray-950/60 p-2.5 rounded-lg border border-emerald-950 text-center">
+                            <span class="text-[10px] text-emerald-400 font-bold block mb-1 uppercase tracking-tight"><i class="fa-solid fa-heart mr-1"></i>Best Helper</span>
+                            <span id="partner-best" class="text-xs md:text-sm font-bold text-gray-200">-</span>
+                        </div>
+                        <div class="bg-gray-950/60 p-2.5 rounded-lg border border-emerald-950 text-center">
+                            <span class="text-[10px] text-rose-400 font-bold block mb-1 uppercase tracking-tight"><i class="fa-solid fa-skull-crossbones mr-1"></i>Worst Rival</span>
+                            <span id="partner-worst" class="text-xs md:text-sm font-bold text-gray-200">-</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="space-y-3 pt-2">
+                <button onclick="restartTest()" class="w-full py-3.5 bg-emerald-950/80 hover:bg-emerald-900 border border-amber-600/30 text-amber-300 rounded-xl text-sm font-bold tracking-wide transition-all cursor-pointer font-serif">
+                    <i class="fa-solid fa-arrow-rotate-left mr-1.5 text-xs"></i> <span id="btn-restart-text">처음부터 다시 탈출하기</span>
+                </button>
+                <div class="flex gap-2">
+                    <button onclick="shareSNS('twitter')" class="flex-1 py-3 bg-gray-950/80 hover:bg-black border border-emerald-900/30 rounded-xl text-xs font-bold text-gray-300 flex items-center justify-center space-x-1.5 transition-all cursor-pointer">
+                        <i class="fa-brands fa-x-twitter text-sm text-amber-500"></i> <span>X 공유</span>
+                    </button>
+                    <button onclick="shareSNS('kakao')" class="flex-1 py-3 bg-[#fee500] hover:bg-[#fdd835] rounded-xl text-xs font-bold text-black flex items-center justify-center space-x-1.5 transition-all cursor-pointer">
+                        <i class="fa-solid fa-comment text-sm"></i> <span>카카오톡</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <footer class="p-4 text-center text-[11px] font-serif text-emerald-700/80 border-t border-emerald-950/30 bg-gray-950/60">
+        © 2026 Team MBTI Project. Developed by 지수(PM), 나린(Analyst), 수빈(Architect).
+    </footer>
+
+    <script>
+        let currentLang = 'KO'; 
+        let currentStep = 0;
+        let userScores = { E: 0, I: 0, S: 0, N: 0, T: 0, F: 0, J: 0, P: 0 };
+        let choiceHistory = [];
+        let activeQuestions = [];
+
+        const dictionary = {
+            KO: {
+                startTitle: "낯선 방에서<br><span class='text-amber-400'>나 자신</span>을 찾아라!",
+                startDesc: "눈을 떠보니 기억이 없다. 사방은 서늘한 기운이 감도는 차가운 벽뿐. 이 기괴한 방들을 탈출하는 과정에서 당신의 진짜 모습을 마주하게 될 것이다.",
+                startBtn: "기억의 방으로 들어가기",
+                loadingText: "기억 조각을 조립하는 중...",
+                lblPros: "성향별 장점",
+                lblAdvice: "일상 극복 조언",
+                lblPartner: "방 탈출 파트너 (궁합)",
+                btnRestart: "처음부터 다시 탈출하기",
+                
+                // 총 16개의 오리지널 방 탈출 질문 풀 (매판 랜덤하게 8개 추출)
+                pool: {
+                    E_I: [
+                        {
+                            text: "첫번째 방을 벗어나니 복도 쪽에서 다른 생존자 무리를 만났다. 대화를 나누어보니 당신처럼 이곳에 갇힌 사람들 같다. 그들이 무리에 합류할 것을 권유할 때 당신은?",
+                            options: {
+                                A: { text: "새로운 생존자 무리에 기꺼이 합류하여 소통하며 함께 탈출구를 찾는다.", score: { E: 1 } },
+                                B: { text: "신중하고 조용히 이동하기 위해 정중히 거절하고 혼자 이동한다.", score: { I: 1 } }
+                            }
+                        },
+                        {
+                            text: "다섯번째 방에서는 어두운 통로와 밝은 중앙 홀로 갈라지는 분기점이 나왔다. 저 멀리 중앙 홀 쪽에서는 탈출구를 찾는 사람들의 웅성거리는 소리가 크게 들려온다. 어디로 향하겠는가?",
+                            options: {
+                                A: { text: "사람들이 모여 소통하는 활기찬 중앙 홀로 향해 함께 활로를 모색한다.", score: { E: 1 } },
+                                B: { text: "혼자 조용히 단서를 독점하고 관찰할 수 있는 어둡고 은밀한 통로로 향한다.", score: { I: 1 } }
+                            }
+                        },
+                        {
+                            text: "방 안에서 우연히 무전기를 발견했다. 채널을 돌리자 다른 방에 갇힌 생존자의 목소리가 들려온다. 이때 당신은?",
+                            options: {
+                                A: { text: "반가운 마음에 즉시 무전을 주고받으며 상대방의 상황을 묻고 길게 대화를 이어간다.", score: { E: 1 } },
+                                B: { text: "필요한 정보만 간결하게 확인한 뒤, 내 주의력이 분산되지 않도록 무전을 빠르게 마친다.", score: { I: 1 } }
+                            }
+                        },
+                        {
+                            text: "겨우 까다로운 트릭 하나를 해결하여 방 문을 열었다. 안도감과 성취감이 몰려오는 이 순간, 당신은 어떻게 행동하는가?",
+                            options: {
+                                A: { text: "주변에 있는 다른 동료들에게 이 기쁨을 크게 표현하며 활력을 얻는다.", score: { E: 1 } },
+                                B: { text: "문이 열린 틈을 타 숨을 헐떡이며 조용히 가만히 앉아 에너지를 재충전한다.", score: { I: 1 } }
+                            }
+                        }
+                    ],
+                    S_N: [
+                        {
+                            text: "두번째 방으로 들어서니, 바닥에 기괴한 무늬가 그려져 있는 열쇠가 떨어져 있고, 그 옆에는 수상한 종교 서적이 하나 놓여 있다. 이 때 당신의 생각은?",
+                            options: {
+                                A: { text: "열쇠에 그려진 것과 같은 무늬를 방 안에서 즉시 찾아, 현실적인 열쇠 사용법에 집중한다.", score: { S: 1 } },
+                                B: { text: "이 무늬가 어떤 상징은 아닐지 의심하며, 내가 이 방에 왜 갇히게 되었는지 거대한 시나리오를 상상해 본다.", score: { N: 1 } }
+                            }
+                        },
+                        {
+                            text: "여섯번째 방은 이상할 정도로 아름다운 장식물과 화려한 그림들이 벽면 가득 채워져 있다. 이 방에서 출구를 찾아야 하는 상황, 당신의 시선은?",
+                            options: {
+                                A: { text: "문고리의 구조, 바닥의 틈새, 가구의 배열 등 물리적으로 조작 가능한 실제적인 단서를 꼼꼼히 살핀다.", score: { S: 1 } },
+                                B: { text: "벽화가 담고 있는 철학적인 은유나 추상적인 의미를 유추하며 공간의 전체적인 '숨겨진 맥락'을 상상한다.", score: { N: 1 } }
+                            }
+                        },
+                        {
+                            text: "벽면에 오래되어 바래진 일기장 한 페이지가 붙어 있다. 탈출한 누군가의 기록 같다. 글을 읽을 때 당신이 먼저 집중하는 부분은?",
+                            options: {
+                                A: { text: "날짜, 방 번호, 구체적인 행동 지침 등 명확하게 사실로 드러난 정보 자체에 주목한다.", score: { S: 1 } },
+                                B: { text: "기록자가 남긴 문장들 사이의 숨겨진 뉘앙스나 미스터리한 복선, 앞으로 생길 일의 가능성을 유추한다.", score: { N: 1 } }
+                            }
+                        },
+                        {
+                            text: "방 한가운데 정체불명의 복잡한 기계 장치가 놓여 있다. 이 장치를 다룰 때 당신의 스타일은?",
+                            options: {
+                                A: { text: "과거에 겪었던 유사한 기계나 기존 방들에서 얻은 확실한 데이터와 경험을 토대로 정밀하게 조작한다.", score: { S: 1 } },
+                                B: { text: "전체적인 장치의 흐름을 직관적으로 파악한 후, 나만의 독창적인 영감이나 가설을 세워 시험해 본다.", score: { N: 1 } }
+                            }
+                        }
+                    ],
+                    T_F: [
+                        {
+                            text: "세번째 방으로 들어서니 구석에 먼저 도착해 있던 다른 생존자 한 명이 다리를 다친 채 고통에 신음하고 있다. 물자를 조금만 나누어 달라고 애원할 때 첫 번째 생각은?",
+                            options: {
+                                A: { text: "한정된 물자와 앞으로 다가올 위험 요소를 계산하며, 그를 돕는 것이 생존에 합리적인 선택인지 이성적으로 따져본다.", score: { T: 1 } },
+                                B: { text: "다친 이의 고통에 깊이 공감하고 안심시킨 후, 정서적으로 연대하며 어떻게든 도울 방법을 먼저 고민한다.", score: { F: 1 } }
+                            }
+                        },
+                        {
+                            text: "아홉번째 방에서 우연히 물자 상자를 발견했다. 안에는 두 사람 분량의 비상식량이 들어있다. 마침 뒤늦게 들어온 낯선 이가 배고픔에 허덕이고 있을 때 당신의 선택은?",
+                            options: {
+                                A: { text: "향후 남은 방의 개수와 소비될 에너지를 계산하여, 내 최소 생존량을 보장하는 선에서 냉정하게 분배한다.", score: { T: 1 } },
+                                B: { text: "굶주려 힘들어하는 상대방의 상황에 마음이 쓰여, 일단 절반을 뚝 떼어 기쁜 마음으로 나누어준다.", score: { F: 1 } }
+                            }
+                        },
+                        {
+                            text: "우연히 외부인과 연결이 닿은 무전기에서 상대방이 긴장한 목소리로 \"거기 무사한가요? 많이 당황하셨겠어요...\"라며 다급하게 물어온다. 당신의 답변은?",
+                            options: {
+                                A: { text: "\"괜찮습니다. 현재 제 위치는 7번 방이고 물자는 충분합니다. 탈출 경로 상황을 즉시 공유해 주세요.\"", score: { T: 1 } },
+                                B: { text: "\"정말 다행이에요! 밖에 살아있는 사람이 있군요. 안은 너무 어둡고 무서운데 다들 괜찮은가요?\"", score: { F: 1 } }
+                            }
+                        },
+                        {
+                            text: "함께 방을 탐색하던 동료가 어처구니없는 실수로 함정을 발동시켜 방 전체가 폐쇄될 뻔했다. 동료에게 건넬 첫 마디는?",
+                            options: {
+                                A: { text: "어째서 그런 실수가 나왔는지 원인을 분석하고, 다음 방부터 조심해야 할 점을 논리적으로 짚어준다.", score: { T: 1 } },
+                                B: { text: "사색이 된 동료가 미안해하고 자책하지 않도록 \"괜찮아, 다치지 않았으면 됐어\"라며 다독여준다.", score: { F: 1 } }
+                            }
+                        }
+                    ],
+                    J_P: [
+                        {
+                            text: "네번째 방의 책상 위에서 탈출 일지처럼 보이는 낡은 노트를 발견했다. 경로에 대한 대략적인 힌트들이 적혀있다. 당신은 이 정보를 어떻게 활용하겠는가?",
+                            options: {
+                                A: { text: "탈출 순서와 단서들의 인과관계를 차근차근 정리하며 완벽한 계획을 먼저 구상한다.", score: { J: 1 } },
+                                B: { text: "일단 힌트들을 머릿속에 가볍게 담아두고, 상황이 닥치는 대로 즉흥적으로 대처하며 나아간다.", score: { P: 1 } }
+                            }
+                        },
+                        {
+                            text: "여덟번째 방의 문을 열기 위해서는 비밀번호 6자리를 맞춰야 한다. 남은 시간은 단 5분. 당신이 취할 행동은?",
+                            options: {
+                                A: { text: "그동안 발견한 숫자 메모들을 시간 순서대로 꼼꼼히 배열하여 확실한 공식과 패턴을 설계해 입력한다.", score: { J: 1 } },
+                                B: { text: "직관적으로 눈에 띄는 힌트 카드들을 조합해 보거나, 여러 번 가볍게 시도하면서 유연하게 패스워드를 알아낸다.", score: { P: 1 } }
+                            }
+                        },
+                        {
+                            text: "방 한구석에서 탈출에 유용해 보이는 다양한 도구와 물품들을 발견했다. 배낭에 이것들을 어떻게 챙겨 넣겠는가?",
+                            options: {
+                                A: { text: "용도별, 크기별로 자리를 정확히 구획하여 필요할 때 즉시 꺼낼 수 있도록 체계적으로 정리해 넣는다.", score: { J: 1 } },
+                                B: { text: "시간이 없으니 일단 눈에 보이는 대로 배낭에 전부 쓸어 담고, 쓸 일이 생기면 그때 뒤져서 찾는다.", score: { P: 1 } }
+                            }
+                        },
+                        {
+                            text: "마지막 열번째 문 앞에 서자 거대한 알람이 울리며 붉은 경고등이 돌기 시작했다. 눈앞에 열린 문 너머는 불확실한 출구로 보인다. 지금 당장 뛰쳐나갈 것인가?",
+                            options: {
+                                A: { text: "탈출 후 혹시 모를 위험에 대비한 안전 계획이 다 세워질 때까지 경보 장치의 패턴을 체크하며 신호에 맞춘다.", score: { J: 1 } },
+                                B: { text: "더 이상 지체할 시간이 없다! 일단 몸을 날려 문 너머의 상황에 즉시 적응하고 본다.", score: { P: 1 } }
+                            }
+                        }
+                    ]
+                },
+
+                results: {
+                    ISTJ: { title: "신중하고 논리적인 생존자", desc: "당신은 규칙과 이성을 철저히 지키는 사람으로, 위기 상황에서도 감정에 휘둘리지 않고 탈출 경로를 이성적으로 계산해 낸 냉철한 이성의 소유자입니다.", pros: "강한 책임감, 논리적 해결, 높은 인내심", advice: "“가끔은 계획대로 되지 않아도 괜찮아요.”", best: "ESTP", worst: "ENFP" },
+                    ISFJ: { title: "헌신적이고 따뜻한 가디언", desc: "당신은 위기 속에서도 동료를 먼저 챙기는 이타적인 생존자입니다. 꼼꼼한 기억력으로 작은 단서도 놓치지 않습니다.", pros: "깊은 경청, 세심함, 협력적 태도", advice: "“타인을 돌보기 전 당신의 에너지도 먼저 챙기세요.”", best: "ESFP", worst: "ENTP" },
+                    INFJ: { title: "통찰력 있는 신비로운 예언자", desc: "방 내부의 거대한 흑막과 숨겨진 진실을 본능적으로 직감하는 통찰가입니다. 가치 있고 의미 있는 생존을 지향합니다.", pros: "높은 직관력, 공감 능력, 전략적 비전", advice: "“생각의 소용돌이에 너무 깊게 빠지지 마세요.”", best: "ENFP", worst: "ESTP" },
+                    INTJ: { title: "치밀하고 전략적인 브레인", desc: "모든 방의 시스템 구조를 파악하려는 냉철한 설계자입니다. 철저한 예측을 기반으로 완벽한 탈출 계획을 수립합니다.", pros: "독립성, 논리적 분석, 문제 해결력", advice: "“타인의 의견도 생존의 효율적 힌트가 될 수 있습니다.”", best: "ENTP", worst: "ESFP" },
+                    ISTP: { title: "탁월한 손재주의 만능 해결사", desc: "상황 변화에 유연하게 대처하며 주변 도구를 도구답게 다룹니다. 말보다는 직접 몸으로 행동하며 방을 돌파합니다.", pros: "냉철한 상황 판단, 도구 활용력, 강한 임기응변", advice: "“혼자 모든 것을 해결하려다 고립될 수 있습니다.”", best: "ESTJ", worst: "ENFP" },
+                    ISFP: { title: "예술적 감각의 평화주의자", desc: "긴장감이 흐르는 방 안에서도 고유의 여유와 감성을 잃지 않습니다. 갈등을 피하고 조용히 융화되는 생존 스타일입니다.", pros: "자유로운 영혼, 친절함, 뛰어난 미적 감각", advice: "“때로는 명확하게 의견을 주장해야 할 때도 있습니다.”", best: "ENFJ", worst: "ENTJ" },
+                    INFP: { title: "이상적인 스토리를 꿈꾸는 방랑자", desc: "비극적인 조난 상황에서도 희망적인 결말을 상상하는 낭만파입니다. 내면의 가치관과 도덕성을 가장 중요시합니다.", pros: "풍부한 상상력, 깊은 공감, 독창성", advice: "“현실의 냉정한 규칙과 타협하는 법도 필요합니다.”", best: "ENFJ", worst: "ESTJ" },
+                    INTP: { title: "비판적 분석의 아이디어 뱅크", desc: "이 방이 만들어진 과학적 원리와 구조적 모순에 의문을 품는 학자 타입입니다. 끊임없이 가설을 세우고 검증합니다.", pros: "지적 호기심, 객관적 분석, 분석적 사고", advice: "“행동 없는 분석은 탈출 시간을 늦출 뿐입니다.”", best: "ENTJ", worst: "ISFP" },
+                    ESTP: { title: "대담하고 파워풀한 행동대장", desc: "고민할 시간에 먼저 문을 두드려보는 스타일입니다. 지치지 않는 활력과 행동력으로 팀원들의 탈출 스피드를 올립니다.", pros: "탁월한 활동력, 위기돌파력, 호탕함", advice: "“움직이기 전 한 번 더 주변의 덫을 살피세요.”", best: "ISTJ", worst: "INFJ" },
+                    ESFP: { title: "에너지 넘치는 분위기 메이커", desc: "절망적인 상황 속에서도 긍정적인 유머로 활기를 불어넣는 인간 비타민입니다. 사람들과 함께 있을 때 가장 안전함을 느낍니다.", pros: "친화력, 낙천적 성향, 뛰어난 리액션", advice: "“감정적인 분위기에 휩쓸려 중요한 룰을 잊지 마세요.”", best: "ISFJ", worst: "INTJ" },
+                    ENFP: { title: "재기발랄한 호기심 가득한 활동가", desc: "방탈출 자체를 하나의 신나는 모험으로 인식하는 초긍정 생존자입니다. 매번 엉뚱하고 기발한 아이디어로 길을 뚫어냅니다.", pros: "사교성, 혁신적 생각, 활력", advice: "“하나의 방에 집중해 마무리 짓는 끈기가 요구됩니다.”", best: "INFJ", worst: "ISTP" },
+                    ENTP: { title: "뜨거운 논쟁을 즐기는 변론가", desc: "트릭을 파괴하거나 게임 마스터의 허점을 찾아 뒤흔드는 것을 즐기는 지적 모험가입니다. 정형화된 정답을 거부합니다.", pros: "두뇌 회전력, 위트, 고정관념 타파", advice: "“협동 게임에서 동료의 심기를 너무 건드리지 마세요.”", best: "INTJ", worst: "ISFJ" },
+                    ESTJ: { title: "엄격한 규율의 현장 지휘관", desc: "모든 멤버의 역할과 물자 분배를 효율적으로 조직화하는 타고난 리더입니다. 계획에 차질이 생기는 것을 가장 싫어합니다.", pros: "체계적 관리, 강력한 추진력, 공정함", advice: "“직설적인 명령조는 동료의 사기를 꺾을 수 있습니다.”", best: "ISTP", worst: "INFP" },
+                    ESFJ: { title: "사교적인 친절한 외교관", desc: "다친 사람을 절대 두고 가지 않으며, 조화로운 분위기를 위해 사소한 챙김을 멈추지 않는 상냥한 동료입니다.", pros: "공동체 의식, 친절함, 계획적 서포트", advice: "“모두를 만족시키려다 자신을 잃어버릴 수 있습니다.”", best: "ISFJ", worst: "INTJ" },
+                    ENFJ: { title: "모두를 이끄는 정의로운 카리스마 리더", desc: "강한 아우라와 진정성으로 흩어진 사람들을 하나로 묶어 함께 탈출 성공 신화를 쓰는 영웅형 인물입니다.", pros: "리더십, 이타성, 뛰어난 설득력", advice: "“모든 실패를 스스로의 책임으로 돌리지 마세요.”", best: "INFP", worst: "ISTP" },
+                    ENTJ: { title: "대담한 통솔력의 전략 사령관", desc: "어떤 거대한 방이라도 결국 정복해 낼 수 있다고 믿는 야심가입니다. 냉철한 비전 제시로 지름길을 개척합니다.", pros: "비전 제시, 강한 통솔력, 결단력", advice: "“효율성만 따지다 동료의 소중한 감정을 다치게 합니다.”", best: "INTP", worst: "ISFP" }
+                }
+            },
+            JA: {
+                startTitle: "見知らぬ部屋で<br><span class='text-amber-400'>自分自身</span>を見つけ出せ！",
+                startDesc: "目を覚ますと記憶がない。四方は冷たい壁ばかり。この奇妙な部屋から脱출하는 過程で、あなたの真の姿と向き合うことになるだろう。",
+                startBtn: "記憶의部屋へ入る",
+                loadingText: "記憶の破片を組み立て中...",
+                lblPros: "タイプ別の長所",
+                lblAdvice: "日常克服のア드바이스",
+                lblPartner: "脱出パートナー(相성)",
+                btnRestart: "最初からやり直す",
+                pool: {
+                    E_I: [
+                        {
+                            text: "最初の部屋を出ると、廊下で他の生存者のグループに出会った。話してみると、彼らもあなたと同じようにここに閉じ込められた人たちのようだ。彼らがグループへの合流を提案してきたとき、あなたは？",
+                            options: {
+                                A: { text: "新しい生存者のグループに進んで合流し、協力して出口を探す。", score: { E: 1 } },
+                                B: { text: "慎重かつ静かに移動するため、丁寧に断り一人で移動する。", score: { I: 1 } }
+                            }
+                        },
+                        {
+                            text: "五つ目の部屋では、暗い通路と明るい中央ホールに分かれる分岐点に出た。遠くの中央ホールのほうからは、出口を探す人々のざわざわした声が大きく聞こえてくる。どちらに進む？",
+                            options: {
+                                A: { text: "人々が集まりコミュニケーションを取る活気ある中央ホールに向かい、共に活路を見出す。", score: { E: 1 } },
+                                B: { text: "一人で静かに手がかりを独占し、観察できる暗く隠密な通路に向かう。", score: { I: 1 } }
+                            }
+                        },
+                        {
+                            text: "部屋の中で偶然無線機を発見した。チャンネルを回すと、他の部屋に閉じ込められた生存者の声が聞こえてくる。この時、あなたは？",
+                            options: {
+                                A: { text: "嬉しさのあまり、すぐに無線を交わして相手の状況を尋ね、長く会話を続ける。", score: { E: 1 } },
+                                B: { text: "必要な情報だけ簡潔に確認し、自分の注意力が散漫にならないよう無線を早く切り上げる。", score: { I: 1 } }
+                            }
+                        },
+                        {
+                            text: "手ごわいトリックを何とか解決し、部屋の扉を開けた。安堵感と達成感が押し寄せるこの瞬間、あなたはどう行動する？",
+                            options: {
+                                A: { text: "周りにいる他の仲間にこの喜びを大きく表現し、活力を得る。", score: { E: 1 } },
+                                B: { text: "扉が開いた隙に、息を弾ませながら静かに座ってエネルギーを再充電する。", score: { I: 1 } }
+                            }
+                        }
+                    ],
+                    S_N: [
+                        {
+                            text: "二つ目の部屋に入ると、床に奇妙な模様が描かれた鍵が落ちており、その横には怪しげな書物が置かれている。この時、あなたの考えは？",
+                            options: {
+                                A: { text: "鍵に描かれたものと同じ模様を部屋の中で即座に探し、現実的な鍵の使い方に集中する。", score: { S: 1 } },
+                                B: { text: "この模様が何らかの象徴ではないかと疑い、なぜ自分がこの部屋に閉じ込められたのか巨大なシナリオを想像してみる。", score: { N: 1 } }
+                            }
+                        },
+                        {
+                            text: "六つ目の部屋は、奇妙なほど美しい装飾物や華やかな絵画で壁一面が満たされている。この部屋で出口を探す際、あなたの視線は？",
+                            options: {
+                                A: { text: "ドアノブの構造、床の隙間、家具の配置など、物理的に操作可能な実際の手がかりを細かく調べる。", score: { S: 1 } },
+                                B: { text: "壁画が含んでいる哲学的な比喩や抽象的な意味を類推し、空間全体の「隠された文脈」を想像する。", score: { N: 1 } }
+                            }
+                        },
+                        {
+                            text: "壁面に古びて色あせた日記の1ページが貼られている。脱出した誰かの記録のようだ。文章を読むとき、あなたが先に集中する部分は？",
+                            options: {
+                                A: { text: "日付、部屋の番号、具体的な行動指針など、明確に事実として表れた情報自体に注目する。", score: { S: 1 } },
+                                B: { text: "記録者が残した文の間の隠されたニュアンスやミステリアスな伏線、今後の可能性を類推する。", score: { N: 1 } }
+                            }
+                        },
+                        {
+                            text: "部屋の中央に正体不明の複雑な機械装置が置かれている。この装置を扱うとき、あなたのスタイルは？",
+                            options: {
+                                A: { text: "過去に経験した類似の機械や、これまでの部屋で得た確実なデータと経験を基に精密に操作する。", score: { S: 1 } },
+                                B: { text: "全体的な装置の流れを直感的に把握した後、自分なりの独創的なインスピレーションや仮説を立てて試してみる。", score: { N: 1 } }
+                            }
+                        }
+                    ],
+                    T_F: [
+                        {
+                            text: "三つ目の部屋に入ると、隅に先着していた他の生存者が足を負傷し、苦痛に喘ぎながら座り込んでいる。物資を少し分けてほしいと哀願された時、最初の考えは？",
+                            options: {
+                                A: { text: "限られた物資と今後の危険要素を計算し、彼を助けることが生存において合理的な選択であるかを理性的に判断する。", score: { T: 1 } },
+                                B: { text: "怪我人の苦痛に深く共感して安心させた後、感情的に寄り添い、何とかして助ける方法をまず考える。", score: { F: 1 } }
+                            }
+                        },
+                        {
+                            text: "九つ目の部屋に到着すると、誰かが残していった物資の箱を見つけた。中には二人分の非常食が入っている。ちょうどそこへ、空腹に苦しむ見知らぬ者が入ってきた時のあなたの選択は？",
+                            options: {
+                                A: { text: "今後の部屋の数と脱出に必要なエネルギーを理性的に計算し、自分の生存量が保証される範囲で冷静に分配する。", score: { T: 1 } },
+                                B: { text: "飢えて苦しむ相手の状況が気にかかり、ひとまず半分を分けて快く分け与える。", score: { F: 1 } }
+                            }
+                        },
+                        {
+                            text: "偶然外部の人間と繋がった無線機から、相手が緊張した声で「そこは無事ですか？とても動揺しているでしょう…」と尋ねてきた。あなたの返答は？",
+                            options: {
+                                A: { text: "「大丈夫です。現在の位置は7番目の部屋で物資は十分です。脱出ルートの状況を即座に共有してください」", score: { T: 1 } },
+                                B: { text: "「本当に良かったです！外に生きている人がいるのですね。中は暗くてとても怖いのですが、皆さんは大丈夫ですか？」", score: { F: 1 } }
+                            }
+                        },
+                        {
+                            text: "一緒に部屋を探索していた仲間が、とんでもないミスで罠を発動させ、部屋全体が閉鎖されそうになった。仲間にかける最初の言葉は？",
+                            options: {
+                                A: { text: "なぜそのようなミスが起きたのか原因を分析し、次の部屋から注意すべき点を論理的に指摘する。", score: { T: 1 } },
+                                B: { text: "青ざめた仲間が申し訳なく思い、自責しないように「大丈夫、怪我がなければそれでいいよ」となだめる。", score: { F: 1 } }
+                            }
+                        }
+                    ],
+                    J_P: [
+                        {
+                            text: "四つ目の部屋의机の上で、脱出日誌らしき古いノートを見つけた。脱出ルートに関する大まかなヒントが書かれている。この情報をどう活用する？",
+                            options: {
+                                A: { text: "脱出順序や手がかりの因果関係を順を追って整理し、完璧な計画を先に構築する。", score: { J: 1 } },
+                                B: { text: "ひとまずヒントを軽く頭に入れ、その場の状況に応じて臨機応変に対処しながら進む。", score: { P: 1 } }
+                            }
+                        },
+                        {
+                            text: "八つ目の部屋の扉を開けるためには、6桁の暗証番号を合わせる必要がある。残された時間はわずか5分。あなたが取る行動は？",
+                            options: {
+                                A: { text: "これまでに発見した数字のメモを時間順に細かく並べ替え、確実な公式とパターンを設計して入力する。", score: { J: 1 } },
+                                B: { text: "直感的に目につくヒントカードを組み合わせてみたり、何度も軽く試しながら柔軟にパスワードを割り出す。", score: { P: 1 } }
+                            }
+                        },
+                        {
+                            text: "部屋の隅で、脱出に役立ちそうな様々な道具や物品を発見した。バックパックにこれらをどう詰め込む？",
+                            options: {
+                                A: { text: "用途別、サイズ別に場所を正確に区画し、必要な時にすぐ取り出せるよう体系的に整理して入れる。", score: { J: 1 } },
+                                B: { text: "時間がないので、ひとまず目に付くものをすべてバックパックに詰め込み、使う時に探す。", score: { J: 1 } } // (로직상 P:1이어야 하므로 아래 JS에서 보정 처리 완료)
+                            }
+                        },
+                        {
+                            text: "最後の十番目の扉の前に立つと、巨大なアラームが鳴り響き、赤い警告灯が回り始めた。目の前に開かれた扉の先は不確実な出口のように見える。今すぐ飛び出す？",
+                            options: {
+                                A: { text: "脱出後に万が一の安全区域を確保する計画が立つまで、警告装置のパターンをチェックし、決められた合図に合わせて動く。", score: { J: 1 } },
+                                B: { text: "これ以上考える時間はない！体を投げ出して扉の先の状況に即座に適応し、まずは飛び出してみる。", score: { P: 1 } }
+                            }
+                        }
+                    ]
+                },
+                results: {
+                    ISTJ: { title: "신중하고 논리적인 생존자", desc: "당신은 규칙과 이성을 철저히 지키는 사람으로, 위기 상황에서도 감정에 휘둘리지 않고 탈출 경로를 이성적으로 계산해 낸 냉철한 이성의 소유자입니다.", pros: "강한 책임감, 논리적 해결, 높은 인내심", advice: "“가끔은 계획대로 되지 않아도 괜찮아요.”", best: "ESTP", worst: "ENFP" },
+                    ISFJ: { title: "헌신적이고 따뜻한 가디언", desc: "당신은 위기 속에서도 동료를 먼저 챙기는 이타적인 생존자입니다. 꼼꼼한 기억력으로 작은 단서도 놓치지 않습니다.", pros: "깊은 경청, 세심함, 협력적 태도", advice: "“타인을 돌보기 전 당신의 에너지도 먼저 챙기세요.”", best: "ESFP", worst: "ENTP" },
+                    INFJ: { title: "통찰력 있는 신비로운 예언자", desc: "방 내부의 거대한 흑막과 숨겨진 진실을 본능적으로 직감하는 통찰가입니다. 가치 있고 의미 있는 생존을 지향합니다.", pros: "높은 직관력, 공감 능력, 전략적 비전", advice: "“생각의 소용돌이에 너무 깊게 빠지지 마세요.”", best: "ENFP", worst: "ESTP" },
+                    INTJ: { title: "치밀하고 전략적인 브레인", desc: "모든 방의 시스템 구조를 파악하려는 냉철한 설계자입니다. 철저한 예측을 기반으로 완벽한 탈출 계획을 수립합니다.", pros: "독립성, 논리적 분석, 문제 해결력", advice: "“타인의 의견도 생존의 효율적 힌트가 될 수 있습니다.”", best: "ENTP", worst: "ESFP" },
+                    ISTP: { title: "탁월한 손재주의 만능 해결사", desc: "상황 변화에 유연하게 대처하며 주변 도구를 도구답게 다룹니다. 말보다는 직접 몸으로 행동하며 방을 돌파합니다.", pros: "냉철한 상황 판단, 도구 활용력, 강한 임기응변", advice: "“혼자 모든 것을 해결하려다 고립될 수 있습니다.”", best: "ESTJ", worst: "ENFP" },
+                    ISFP: { title: "예술적 감각의 평화주의자", desc: "긴장감이 흐르는 방 안에서도 고유의 여유와 감성을 잃지 않습니다. 갈등을 피하고 조용히 융화되는 생존 스타일입니다.", pros: "자유로운 영혼, 친절함, 뛰어난 미적 감각", advice: "“때로는 명확하게 의견을 주장해야 할 때도 있습니다.”", best: "ENFJ", worst: "ENTJ" },
+                    INFP: { title: "이상적인 스토리를 꿈꾸는 방랑자", desc: "비극적인 조난 상황에서도 희망적인 결말을 상상하는 낭만파입니다. 내면의 가치관과 도덕성을 가장 중요시합니다.", pros: "풍부한 상상력, 깊은 공감, 독창성", advice: "“현실의 냉정한 규칙과 타협하는 법도 필요합니다.”", best: "ENFJ", worst: "ESTJ" },
+                    INTP: { title: "비판적 분석의 아이디어 뱅크", desc: "이 방이 만들어진 과학적 원리와 구조적 모순에 의문을 품는 학자 타입입니다. 끊임없이 가설을 세우고 검증합니다.", pros: "지적 호기심, 객관적 분석, 분석적 사고", advice: "“행동 없는 분석은 탈출 시간을 늦출 뿐입니다.”", best: "ENTJ", worst: "ISFP" },
+                    ESTP: { title: "대담하고 파워풀한 행동대장", desc: "고민할 시간에 먼저 문을 두드려보는 스타일입니다. 지치지 않는 활력과 행동력으로 팀원들의 탈출 스피드를 올립니다.", pros: "탁월한 활동력, 위기돌파력, 호탕함", advice: "“움직이기 전 한 번 더 주변의 덫을 살피세요.”", best: "ISTJ", worst: "INFJ" },
+                    ESFP: { title: "에너지 넘치는 분위기 메이커", desc: "절망적인 상황 속에서도 긍정적인 유머로 활기를 불어넣는 인간 비타민입니다. 사람들과 함께 있을 때 가장 안전함을 느낍니다.", pros: "친화력, 낙천적 성향, 뛰어난 리액션", advice: "“감정적인 분위기에 휩쓸려 중요한 룰을 잊지 마세요.”", best: "ISFJ", worst: "INTJ" },
+                    ENFP: { title: "재기발랄한 호기심 가득한 활동가", desc: "방탈출 자체를 하나의 신나는 모험으로 인식하는 초긍정 생존자입니다. 매번 엉뚱하고 기발한 아이디어로 길을 뚫어냅니다.", pros: "사교성, 혁신적 생각, 활력", advice: "“하나의 방에 집중해 마무리 짓는 끈기가 요구됩니다.”", best: "INFJ", worst: "ISTP" },
+                    ENTP: { title: "뜨거운 논쟁을 즐기는 변론가", desc: "트릭을 파괴하거나 게임 마스터의 허점을 찾아 뒤흔드는 것을 즐기는 지적 모험가입니다. 정형화된 정답을 거부합니다.", pros: "두뇌 회전력, 위트, 고정관념 타파", advice: "“협동 게임에서 동료의 심기를 너무 건드리지 마세요.”", best: "INTJ", worst: "ISFJ" },
+                    ESTJ: { title: "엄격한 규율의 현장 지휘관", desc: "모든 멤버의 역할과 물자 분배를 효율적으로 조직화하는 타고난 리더입니다. 계획에 차질이 생기는 것을 가장 싫어합니다.", pros: "체계적 관리, 강력한 추진력, 공정함", advice: "“직설적인 명령조는 동료의 사기를 꺾을 수 있습니다.”", best: "ISTP", worst: "INFP" },
+                    ESFJ: { title: "사교적인 친절한 외교관", desc: "다친 사람을 절대 두고 가지 않으며, 조화로운 분위기를 위해 사소한 챙김을 멈추지 않는 상냥한 동료입니다.", pros: "공동체 의식, 친절함, 계획적 서포트", advice: "“모두를 만족시키려다 자신을 잃어버릴 수 있습니다.”", best: "ISFJ", worst: "INTJ" },
+                    ENFJ: { title: "모두를 이끄는 정의로운 카리스마 리더", desc: "강한 아우라와 진정성으로 흩어진 사람들을 하나로 묶어 함께 탈출 성공 신화를 쓰는 영웅형 인물입니다.", pros: "리더십, 이타성, 뛰어난 설득력", advice: "“모든 실패를 스스로의 책임으로 돌리지 마세요.”", best: "INFP", worst: "ISTP" },
+                    ENTJ: { title: "대담한 통솔력의 전략 사령관", desc: "어떤 거대한 방이라도 결국 정복해 낼 수 있다고 믿는 야심가입니다. 냉철한 비전 제시로 지름길을 개척합니다.", pros: "비전 제시, 강한 통솔력, 결단력", advice: "“효율성만 따지다 동료의 소중한 감정을 다치게 합니다.”", best: "INTP", worst: "ISFP" }
+                }
+            }
+        };
+
+        // 오타 수정을 위한 일본어 pool 내 중복 수치 보정
+        dictionary.JA.pool.J_P[2].options.B.score = { P: 1 };
+
+        function updateDOMText() {
+            const currentDic = dictionary[currentLang];
+            
+            document.getElementById('start-title').innerHTML = currentDic.startTitle;
+            document.getElementById('start-desc').innerText = currentDic.startDesc;
+            document.getElementById('start-btn-text').innerText = currentDic.startBtn;
+            
+            document.querySelector('.lbl-pros').innerText = currentDic.lblPros;
+            document.querySelector('.lbl-advice').innerText = currentDic.lblAdvice;
+            document.querySelector('.lbl-partner').innerText = currentDic.lblPartner;
+            document.getElementById('btn-restart-text').innerText = currentDic.btnRestart;
+            document.getElementById('loading-text').innerText = currentDic.loadingText;
+
+            if (document.getElementById('test-page').style.display !== 'none' && activeQuestions[currentStep]) {
+                showQuestion();
+            }
+        }
+
+        function toggleLanguage() {
+            if (currentLang === 'KO') {
+                currentLang = 'JA';
+                document.getElementById('lang-text').innerText = "KO / 한국어";
+            } else {
+                currentLang = 'KO';
+                document.getElementById('lang-text').innerText = "JA / 日本語";
+            }
+            updateDOMText();
+        }
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        // 지표별로 균등하게 섞어서 총 8문항 빌드
+        function buildRandomQuestions() {
+            const pool = dictionary[currentLang].pool;
+            
+            const e_i_selected = shuffleArray([...pool.E_I]).slice(0, 2);
+            const s_n_selected = shuffleArray([...pool.S_N]).slice(0, 2);
+            const t_f_selected = shuffleArray([...pool.T_F]).slice(0, 2);
+            const j_p_selected = shuffleArray([...pool.J_P]).slice(0, 2);
+            
+            const combined = [...e_i_selected, ...s_n_selected, ...t_f_selected, ...j_p_selected];
+            activeQuestions = shuffleArray(combined);
+        }
+
+        function startTest() {
+            buildRandomQuestions();
+            document.getElementById('start-page').classList.add('hidden');
+            document.getElementById('test-page').classList.remove('hidden');
+            currentStep = 0;
+            choiceHistory = [];
+            userScores = { E: 0, I: 0, S: 0, N: 0, T: 0, F: 0, J: 0, P: 0 };
+            showQuestion();
+        }
+
+        function showQuestion() {
+            const totalQuestions = activeQuestions.length;
+            
+            document.getElementById('progress-text').innerText = `${currentStep + 1} / ${totalQuestions}`;
+            document.getElementById('progress-bar').style.width = `${((currentStep + 1) / totalQuestions) * 100}%`;
+            
+            if (currentStep === 0) {
+                document.getElementById('back-btn').style.visibility = 'hidden';
+            } else {
+                document.getElementById('back-btn').style.visibility = 'visible';
+            }
+
+            const q = activeQuestions[currentStep];
+            document.getElementById('question-text').innerText = q.text;
+            document.getElementById('option-a').innerText = q.options.A.text;
+            document.getElementById('option-b').innerText = q.options.B.text;
+        }
+
+        function selectOption(type) {
+            const q = activeQuestions[currentStep];
+            const selectedScore = q.options[type].score;
+
+            choiceHistory.push({ step: currentStep, scoreAdded: selectedScore });
+            for (let key in selectedScore) {
+                userScores[key] += selectedScore[key];
+            }
+
+            currentStep++;
+            if (currentStep < activeQuestions.length) {
+                showQuestion();
+            } else {
+                calculateAndShowResult();
+            }
+        }
+
+        function prevQuestion() {
+            if (currentStep > 0 && choiceHistory.length > 0) {
+                currentStep--;
+                const lastChoice = choiceHistory.pop();
+                for (let key in lastChoice.scoreAdded) {
+                    userScores[key] -= lastChoice.scoreAdded[key];
+                }
+                showQuestion();
+            }
+        }
+
+        function calculateAndShowResult() {
+            document.getElementById('test-page').classList.add('hidden');
+            document.getElementById('loading-page').classList.remove('hidden');
+
+            setTimeout(() => {
+                document.getElementById('loading-page').classList.add('hidden');
+                document.getElementById('result-page').classList.remove('hidden');
+
+                let mbtiResult = "";
+                mbtiResult += (userScores.E >= userScores.I) ? "E" : "I";
+                mbtiResult += (userScores.S >= userScores.N) ? "S" : "N";
+                mbtiResult += (userScores.T >= userScores.F) ? "T" : "F";
+                mbtiResult += (userScores.J >= userScores.P) ? "J" : "P";
+
+                const currentDic = dictionary[currentLang];
+                const rData = currentDic.results[mbtiResult] || currentDic.results["ISTJ"];
+
+                document.getElementById('result-mbti').innerText = mbtiResult;
+                document.getElementById('result-title').innerText = rData.title;
+                document.getElementById('result-desc').innerText = rData.desc;
+                document.getElementById('result-pros').innerText = rData.pros;
+                document.getElementById('result-advice').innerText = rData.advice;
+                document.getElementById('partner-best').innerText = rData.best;
+                document.getElementById('partner-worst').innerText = rData.worst;
+
+            }, 1400);
+        }
+
+        function restartTest() {
+            document.getElementById('result-page').classList.add('hidden');
+            document.getElementById('start-page').classList.remove('hidden');
+        }
+
+        function shareSNS(platform) {
+            const currentDic = dictionary[currentLang];
+            const mbti = document.getElementById('result-mbti').innerText;
+            const title = document.getElementById('result-title').innerText;
+            const sendText = `[PROJECT EXIT] ${currentDic.startTitle.replace('<br>', ' ')} 결과 나는 [${mbti}: ${title}] 타입! 당신의 성향을 테스트해보세요.`;
+            const currentUrl = window.location.href;
+
+            if (platform === 'twitter') {
+                const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(sendText)}&url=${encodeURIComponent(currentUrl)}`;
+                window.open(twitterUrl, '_blank');
+            } else if (platform === 'kakao') {
+                alert(`[카카오톡 공유 전송 데이터]\n\n${sendText}\n\n링크: ${currentUrl}`);
+            }
+        }
+
+        updateDOMText();
+    </script>
+</body>
+</html>
